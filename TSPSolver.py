@@ -82,8 +82,32 @@ class TSPSolver:
     '''
 
     def greedy(self, time_allowance=60.0):
-        pass
+        # Iterate through start cities
+        cities = self._scenario.getCities()
+        solutions = []
+        for start_city in cities:
+            visited_status = {city._index: False for city in cities}
+            current = start_city
+            path = [current]
+            visited_status[current._index] = True
+            next_city = min(cities, key=lambda c: current.costTo(c))
+            while not all(visited_status.values()) and visited_status[next_city._index] != True:
+                current = next_city
+                visited_status[current._index] = True
+                path.append(current)
+                next_city = min(cities, key=lambda c: current.costTo(c))
+            if self.is_complete_greedy(path):
+                solutions.append(TSPSolution(path))
+        results = {}
+        # TODO other results
+        results["soln"] = min(solutions, key=lambda soln: soln.cost)
+        return results
 
+
+    def is_complete_greedy(self, path):
+        return len(path) == len(self._scenario.getCities()) \
+               and len(path) == len(set(path)) \
+               and path[0].costTo(path[-1]) != np.inf
     ''' <summary>
         This is the entry point for the branch-and-bound algorithm that you will implement
         </summary>
@@ -187,6 +211,8 @@ class TSPSolver:
 
     def is_complete_soln(self, sub_prob):
         return len(sub_prob.path) == len(self._scenario.getCities()) and len(sub_prob.path) == len(set(sub_prob.path))
+
+
 
     ''' <summary>
         This is the entry point for the algorithm you'll write for your group project.
